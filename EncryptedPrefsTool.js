@@ -10,7 +10,9 @@ Java.perform(function () {
 	var Application = Java.use("android.app.Application");
 	var Context = Java.use("android.content.Context");
 	var MasterKeyBuilder = Java.use("androidx.security.crypto.MasterKey$Builder");
-	var MasterKeys = Java.use("androidx.security.crypto.MasterKeys");
+	var MasterKey_KeyScheme = Java.use("androidx.security.crypto.MasterKey$KeyScheme");
+	var PrefKeyEncryptionScheme = Java.use("androidx.security.crypto.EncryptedSharedPreferences$PrefKeyEncryptionScheme");
+	var PrefValueEncryptionScheme = Java.use("androidx.security.crypto.EncryptedSharedPreferences$PrefValueEncryptionScheme");
 	
 	var globalContext = null;
 	var globalSharedPreferencesFile = null;
@@ -57,16 +59,18 @@ Java.perform(function () {
 			preferenceName = preferenceFile;
 		}
 		// Create a MasterKey for encryption
-		var masterKeyAlias = MasterKeys.AES256_GCM_SPEC;
+		var masterKeyAlias = MasterKey_KeyScheme.AES256_GCM.value;
 		var masterKeyBuilder = MasterKeyBuilder.$new(globalContext, "_androidx_security_master_key_");
-		masterKeyBuilder.setKeyScheme();
+		masterKeyBuilder.setKeyScheme(masterKeyAlias);
 		var masterKey = masterKeyBuilder.build();
 
 		// Get the encrypted shared preferences for the file
 		var encryptedSharedPreferences_obj = EncryptedSharedPreferences.create(
 			globalContext,
 			preferenceName,
-			masterKey
+			masterKey,
+			PrefKeyEncryptionScheme.AES256_SIV.value,
+			PrefValueEncryptionScheme.AES256_GCM.value
 		);
 		
 		if(print){
